@@ -11,7 +11,7 @@ const ACCESS_TOKEN = 'APP_USR-5330867646658469-042813-cf37262e40620f5eade843d4d4
 const ESP32_IP = "http://192.168.15.43";
 
 // 🌐 LINK DO NGROK (ATUALIZA SE MUDAR)
-const BASE_URL = "https://flimsily-unfaulty-pandora.ngrok-free.dev";
+const BASE_URL = "https://pix-lavanderia-production.up.railway.app";
 
 // =============================
 // 🚀 ROTA DE PAGAMENTO (QR CODE)
