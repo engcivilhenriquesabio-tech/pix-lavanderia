@@ -19,30 +19,31 @@ const BASE_URL = "https://pix-lavanderia-production.up.railway.app";
 app.get('/criar-pix', async (req, res) => {
   try {
     const response = await axios.post(
-      'https://api.mercadopago.com/checkout/preferences',
+  'https://api.mercadopago.com/checkout/preferences',
+  {
+    items: [
       {
-  items: [
-    {
-      title: "Sacola Lavanderia",
-      quantity: 1,
-      unit_price: 9.90
-    }
-  ],
-  payment_methods: {
-    excluded_payment_types: [
-      { id: "ticket" },
-      { id: "atm" }
-    ]
-  },
-  notification_url: `${BASE_URL}/webhook`
-},
-      {
-        headers: {
-          Authorization: `Bearer ${ACCESS_TOKEN}`,
-          'Content-Type': 'application/json'
-        }
+        title: "Sacola Lavanderia",
+        quantity: 1,
+        unit_price: 9.90
       }
-    );
+    ],
+    payer: {
+      email: "comprador@email.com"
+    },
+    payment_methods: {
+      installments: 1
+    },
+    statement_descriptor: "LAVANDERIA",
+    notification_url: `${BASE_URL}/webhook`
+  },
+  {
+    headers: {
+      Authorization: `Bearer ${ACCESS_TOKEN}`,
+      'Content-Type': 'application/json'
+    }
+  }
+);
 
     const init_point = response.data.init_point;
 
