@@ -3,19 +3,23 @@ const axios = require('axios');
 
 const app = express();
 app.use(express.json());
-app.get('/', (req, res) => {
-  res.send("Servidor online 🚀");
-});
 
 // =============================
 // 🔐 CONFIG
 // =============================
-const ACCESS_TOKEN = 'APP_USR-676309850173258-042921-a6849f3e25ccce1aeef9eac881edcb11-349504211'; // ⚠️ coloque o seu aqui
+const ACCESS_TOKEN = 'APP_USR-2523882070735687-042813-6ce077c5048d22241bc18e42bb26e71b-349504211'; // coloque seu token correto aqui
 const ESP32_IP = "http://192.168.15.43";
 const BASE_URL = "https://pix-lavanderia-production.up.railway.app";
 
 // =============================
-// 🚀 CRIAR PAGAMENTO (QR CODE)
+// ✅ ROTA TESTE (IMPORTANTE PRO RAILWAY)
+// =============================
+app.get('/', (req, res) => {
+  res.status(200).send("Servidor online 🚀");
+});
+
+// =============================
+// 🚀 CRIAR PAGAMENTO
 // =============================
 app.get('/criar-pix', async (req, res) => {
   try {
@@ -45,14 +49,15 @@ app.get('/criar-pix', async (req, res) => {
 
     const init_point = response.data.init_point;
 
-    console.log("🔗 Link pagamento:", init_point);
+    console.log("🔗 Checkout:", init_point);
 
-    res.redirect(init_point);
+    return res.redirect(init_point);
 
   } catch (err) {
     console.log("❌ ERRO AO CRIAR PAGAMENTO:");
     console.log(err.response?.data || err.message);
-    res.status(500).send("Erro ao gerar pagamento");
+
+    return res.status(500).send("Erro ao gerar pagamento");
   }
 });
 
@@ -65,12 +70,10 @@ app.post('/webhook', async (req, res) => {
 
     let paymentId = null;
 
-    // Novo formato
     if (req.body.type === "payment") {
       paymentId = req.body.data.id;
     }
 
-    // Formato antigo
     if (req.body.topic === "payment") {
       paymentId = req.body.resource;
     }
@@ -79,7 +82,6 @@ app.post('/webhook', async (req, res) => {
       return res.sendStatus(200);
     }
 
-    // Buscar pagamento real
     const response = await axios.get(
       `https://api.mercadopago.com/v1/payments/${paymentId}`,
       {
@@ -91,24 +93,24 @@ app.post('/webhook', async (req, res) => {
 
     const status = response.data.status;
 
-    console.log("💰 Status pagamento:", status);
+    console.log("💰 Status:", status);
 
     if (status === "approved") {
       console.log("🚀 LIBERANDO MÁQUINA");
 
       try {
         await axios.get(`${ESP32_IP}/liberar`);
-        console.log("✅ LIBERADO COM SUCESSO");
+        console.log("✅ LIBERADO");
       } catch (err) {
-        console.log("❌ ERRO AO ACIONAR ESP32:", err.message);
+        console.log("❌ ERRO ESP32:", err.message);
       }
     }
 
-    res.sendStatus(200);
+    return res.sendStatus(200);
 
   } catch (err) {
     console.log("❌ ERRO WEBHOOK:", err.response?.data || err.message);
-    res.sendStatus(500);
+    return res.sendStatus(500);
   }
 });
 
@@ -117,6 +119,6 @@ app.post('/webhook', async (req, res) => {
 // =============================
 const PORT = process.env.PORT || 3000;
 
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
   console.log("🚀 Servidor rodando na porta", PORT);
 });
