@@ -21,15 +21,21 @@ app.get('/criar-pix', async (req, res) => {
     const response = await axios.post(
       'https://api.mercadopago.com/checkout/preferences',
       {
-        items: [
-          {
-            title: "Sacola Lavanderia",
-            quantity: 1,
-            unit_price: 9.90
-          }
-        ],
-        notification_url: `${BASE_URL}/webhook`
-      },
+  items: [
+    {
+      title: "Sacola Lavanderia",
+      quantity: 1,
+      unit_price: 9.90
+    }
+  ],
+  payment_methods: {
+    excluded_payment_types: [
+      { id: "ticket" },
+      { id: "atm" }
+    ]
+  },
+  notification_url: `${BASE_URL}/webhook`
+},
       {
         headers: {
           Authorization: `Bearer ${ACCESS_TOKEN}`,
